@@ -1,9 +1,8 @@
 from fastapi import FastAPI
 
+from .currency_converter.routes import converter_router
+
 
 app = FastAPI()
 
-
-@app.get('/index')
-async def index():
-    return 'r'
+app.include_router(converter_router, prefix='/api/currencies')

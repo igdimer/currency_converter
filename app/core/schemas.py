@@ -2,5 +2,5 @@ from pydantic import BaseModel
 
 
 class BaseSchema(BaseModel):
+    """Base model for all schemas."""
     pass
-

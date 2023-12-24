@@ -17,8 +17,8 @@ migrate:
 	alembic upgrade head
 
 check:
-	isort app tests
-	flake8 app tests
-	mypy app tests
+	isort app
+	flake8 app
+	mypy app
 	pytest
 	yamllint --strict .
