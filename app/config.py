@@ -1,6 +1,5 @@
 from pydantic_settings import BaseSettings
-from pydantic import PostgresDsn
-from pydantic import RedisDsn
+from pydantic import PostgresDsn, RedisDsn, HttpUrl
 
 
 class Settings(BaseSettings):
@@ -8,6 +7,8 @@ class Settings(BaseSettings):
 
     DATABASE_DSN: PostgresDsn
     REDIS_DSN: RedisDsn
+    EXCHANGERATE_URL: HttpUrl
+    EXCHANGERATE_ACCESS_KEY: str
 
     class Config:
         env_file = '.env'
