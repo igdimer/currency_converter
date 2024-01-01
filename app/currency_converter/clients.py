@@ -11,19 +11,20 @@ ResponseDict = TypedDict('ResponseDict', {
 })
 
 
-class BaseClientException(Exception):
+class BaseClientError(Exception):
+    """Base exception class for clients."""
     pass
 
 
 class ExchangerateClient:
     """The client for interaction with exchangerate.host API."""
 
-    class ClientError(BaseClientException):
+    class ClientError(BaseClientError):
 
-        def __init__(self, message):
+        def __init__(self, message) -> None:
             self.message = message
 
-    class UnknownClientError(BaseClientException):
+    class UnknownClientError(BaseClientError):
 
         message = 'Unknown error'
 
