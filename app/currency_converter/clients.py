@@ -11,8 +11,21 @@ ResponseDict = TypedDict('ResponseDict', {
 })
 
 
+class BaseClientException(Exception):
+    pass
+
+
 class ExchangerateClient:
     """The client for interaction with exchangerate.host API."""
+
+    class ClientError(BaseClientException):
+
+        def __init__(self, message):
+            self.message = message
+
+    class UnknownClientError(BaseClientException):
+
+        message = 'Unknown error'
 
     def __init__(self) -> None:
         self.url = settings.EXCHANGERATE_URL
@@ -28,8 +41,13 @@ class ExchangerateClient:
         async with httpx.AsyncClient() as session:
             response = await session.get(url, params=params)
         response_data = response.json()
+
         if response_data['success'] != 'true':
-            print('No success')  # raise CustomException TODO write CustomException
+            try:
+                message = response_data['error']['info']
+            except KeyError:
+                raise self.UnknownClientError()
+            raise self.ClientError(message=message)
 
         return response_data
 
@@ -43,6 +61,9 @@ class ExchangerateClient:
         response_data = await self._get(url, params=params)
 
         pair = base + target
-        rate = response_data['quotes'][pair]  # TODO wrap into try-except with KeyError
+        try:
+            rate = response_data['quotes'][pair]
+        except KeyError:
+            raise self.UnknownClientError()
 
         return rate
