@@ -1,7 +1,8 @@
 from typing import Annotated
 
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, Query
 
+from app.core.exceptions import CustomApiError
 from .clients import ExchangerateClient
 from .schemas import RateOutput
 
@@ -19,7 +20,7 @@ async def get_rate(
     try:
         rate = await client.get_rate(base, target)
     except (ExchangerateClient.ClientError, ExchangerateClient.UnknownClientError) as exc:
-        raise HTTPException(status_code=400, detail=exc.message)
+        raise CustomApiError(status_code=400, detail=exc.message)
 
     return RateOutput(
         pair=base + target,
