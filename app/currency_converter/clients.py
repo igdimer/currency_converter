@@ -29,7 +29,7 @@ class ExchangerateClient:
         message = 'Unknown error'
 
     def __init__(self) -> None:
-        self.url = settings.EXCHANGERATE_URL
+        self.url = settings.EXCHANGERATE_URL.unicode_string()
         self.access_key = settings.EXCHANGERATE_ACCESS_KEY
 
     async def _get(self, url, params=None) -> ResponseDict:
@@ -58,7 +58,7 @@ class ExchangerateClient:
             'source': base,
             'currencies': target,
         }
-        url = urljoin(str(self.url), 'live')
+        url = urljoin(self.url, 'live')
         response_data = await self._get(url, params=params)
 
         pair = base + target
