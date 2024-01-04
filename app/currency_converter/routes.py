@@ -2,9 +2,9 @@ from typing import Annotated
 
 from fastapi import APIRouter, Query
 
-from app.core.exceptions import CustomApiError
-from .clients import ExchangerateClient
+from .exceptions import ExchangerateApiError
 from .schemas import RateOutput
+from .services import CurrencyService
 
 
 converter_router = APIRouter()
@@ -16,14 +16,10 @@ async def get_rate(
     target: Annotated[str, Query(max_length=3)],
 ):
     """Get currency rate."""
-    client = ExchangerateClient()
+    service = CurrencyService()
     try:
-        rate = await client.get_rate(base, target)
-    except (ExchangerateClient.ClientError, ExchangerateClient.UnknownClientError) as exc:
-        raise CustomApiError(status_code=400, detail=exc.message)
+        rate = await service.get_rate(base=base, target=target)
+    except CurrencyService.ExchangerateClientError as exc:
+        raise ExchangerateApiError(detail=exc.message) from exc
 
-    return RateOutput(
-        pair=base + target,
-        rate=rate,
-        description=f'1 {base} = {rate} {target}',
-    )
+    return rate

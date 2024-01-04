@@ -4,20 +4,17 @@ from urllib.parse import urljoin
 import httpx
 
 from app.config import settings
+from app.core.exceptions import BaseClientError
 
 ResponseDict = TypedDict('ResponseDict', {
     'success': str,
     'quotes': dict[str, float],
+    'currencies': dict[str, str],
 })
 
 
-class BaseClientError(Exception):
-    """Base exception class for clients."""
-    pass
-
-
 class ExchangerateClient:
-    """The client for interaction with exchangerate.host API."""
+    """The client for interaction with Exchangerate API."""
 
     class ClientError(BaseClientError):
 
@@ -26,7 +23,7 @@ class ExchangerateClient:
 
     class UnknownClientError(BaseClientError):
 
-        message = 'Unknown error'
+        message = 'Unknown error from third party service'
 
     def __init__(self) -> None:
         self.url = settings.EXCHANGERATE_URL.unicode_string()
@@ -43,7 +40,7 @@ class ExchangerateClient:
             response = await session.get(url, params=params)
         response_data = response.json()
 
-        if response_data['success'] != 'true':
+        if not response_data['success']:
             try:
                 message = response_data['error']['info']
             except KeyError:
@@ -52,7 +49,7 @@ class ExchangerateClient:
 
         return response_data
 
-    async def get_rate(self, base: str, target: str):
+    async def get_rate(self, *, base: str, target: str) -> float:
         """Get currency rate."""
         params = {
             'source': base,
@@ -68,3 +65,14 @@ class ExchangerateClient:
             raise self.UnknownClientError()
 
         return rate
+
+    async def get_available_currencies(self) -> dict[str, str]:
+        """Get list of available currencies."""
+        url = urljoin(self.url, 'list')
+        response_data = await self._get(url)
+        try:
+            currencies = response_data['currencies']
+        except KeyError:
+            raise self.UnknownClientError()
+
+        return currencies

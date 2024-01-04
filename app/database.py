@@ -7,7 +7,7 @@ from sqlalchemy.ext.declarative import declarative_base
 from .config import settings
 
 engine = create_async_engine(
-    settings.DATABASE_DSN.unicode_string(),  # type: ignore[arg-type]
+    settings.DATABASE_DSN.unicode_string(),
     echo=True,
 )
 async_session = async_sessionmaker(engine, expire_on_commit=False)
