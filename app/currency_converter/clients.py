@@ -23,7 +23,7 @@ class ExchangerateClient:
 
     class UnknownClientError(BaseClientError):
 
-        message = 'Unknown error from third party service'
+        message = 'Unknown error from third party service.'
 
     def __init__(self) -> None:
         self.url = settings.EXCHANGERATE_URL.unicode_string()
@@ -36,16 +36,15 @@ class ExchangerateClient:
         else:
             params.update({'access_key': self.access_key})
 
-        async with httpx.AsyncClient() as session:
-            response = await session.get(url, params=params)
+        async with httpx.AsyncClient() as client:
+            response = await client.get(url, params=params)
         response_data = response.json()
 
-        if not response_data['success']:
-            try:
-                message = response_data['error']['info']
-            except KeyError:
-                raise self.UnknownClientError()
-            raise self.ClientError(message=message)
+        try:
+            if not response_data['success']:
+                raise self.ClientError(message=response_data['error']['info'])
+        except (KeyError, TypeError):
+            raise self.UnknownClientError()
 
         return response_data
 

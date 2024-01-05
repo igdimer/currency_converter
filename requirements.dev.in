@@ -21,7 +21,6 @@ mypy
 types-chardet
 types-freezegun
 types-redis
-types-requests
 types-ujson
 
 pytest
@@ -31,6 +30,5 @@ pytest-httpx
 pytest-timeout
 freezegun
 factory-boy
-hypothesis
 
 yamllint
