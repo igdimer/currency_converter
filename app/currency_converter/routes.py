@@ -2,7 +2,7 @@ from typing import Annotated
 
 from fastapi import APIRouter, Query
 
-from .exceptions import ExchangerateApiError
+from .import exceptions
 from .schemas import RateOutput
 from .services import CurrencyService
 
@@ -20,6 +20,8 @@ async def get_rate(
     try:
         rate = await service.get_rate(base=base, target=target)
     except CurrencyService.ExchangerateClientError as exc:
-        raise ExchangerateApiError(detail=exc.message) from exc
+        raise exceptions.ExchangerateApiError(detail=exc.message) from exc
+    except CurrencyService.CurrencyNotAvailableError as exc:
+        raise exceptions.CurrencyNotAvailable() from exc
 
     return rate

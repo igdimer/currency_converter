@@ -9,3 +9,10 @@ class ExchangerateApiError(CustomApiError):
     def __init__(self, detail: str) -> None:
         self.detail = detail
         self.status_code = status.HTTP_400_BAD_REQUEST
+
+
+class CurrencyNotAvailable(CustomApiError):
+    """Provided currency is not available."""
+
+    detail = 'Provided currency is not available.'
+    status_code = status.HTTP_400_BAD_REQUEST
