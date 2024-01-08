@@ -5,12 +5,21 @@ import httpx
 import pytest
 import pytest_asyncio
 
+from app.redis import redis_client
+
 
 @pytest.fixture(scope='module')
 def event_loop():
+    """Event loop fixture."""
     loop = asyncio.get_event_loop()
     yield loop
     loop.close()
+
+
+@pytest.fixture()
+async def setup_method():  # noqa: PT004
+    """Clear redis cache before tests."""
+    await redis_client.flushdb()
 
 
 @pytest_asyncio.fixture
