@@ -1,7 +1,7 @@
 from urllib.parse import urljoin
 
-import pytest
 import httpx
+import pytest
 
 from app.config import settings
 from app.currency_converter.clients import ExchangerateClient

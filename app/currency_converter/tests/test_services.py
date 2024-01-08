@@ -1,10 +1,8 @@
-import asyncio
 import pytest
-import pytest_asyncio
 
+from app.currency_converter.clients import ExchangerateClient
 from app.currency_converter.services import CurrencyService
 from app.redis import redis_client
-from app.currency_converter.clients import ExchangerateClient
 
 
 @pytest.fixture

@@ -2,10 +2,9 @@ from typing import Annotated
 
 from fastapi import APIRouter, Query
 
-from .import exceptions
+from . import exceptions
 from .schemas import RateOutput
 from .services import CurrencyService
-
 
 converter_router = APIRouter()
 

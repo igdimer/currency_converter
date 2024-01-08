@@ -1,7 +1,7 @@
 from fastapi.encoders import jsonable_encoder
+from starlette import status
 from starlette.requests import Request
 from starlette.responses import JSONResponse
-from starlette import status
 
 
 async def internal_exception_handler(request: Request, exc: Exception):

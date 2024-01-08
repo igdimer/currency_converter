@@ -1,9 +1,9 @@
-from unittest import mock
 import asyncio
+from unittest import mock
 
-import pytest_asyncio
-import pytest
 import httpx
+import pytest
+import pytest_asyncio
 
 
 @pytest.fixture(scope='module')
