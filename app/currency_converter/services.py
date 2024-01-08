@@ -18,7 +18,7 @@ class CurrencyService:
         """Provided currency is not available on external API."""
 
     def __init__(self) -> None:
-        self.__available_currencies: dict[str, str] | None = None
+        self._available_currencies: dict[str, str] | None = None
         self._redis_client = redis_client
 
     async def get_available_currencies_from_external_api(self) -> dict[str, str]:
@@ -35,7 +35,7 @@ class CurrencyService:
         )
         await self._redis_client.aclose()  # type: ignore[attr-defined]
 
-        self.__available_currencies = currencies
+        self._available_currencies = currencies
 
         return currencies
 
@@ -43,7 +43,7 @@ class CurrencyService:
         """Check whether currency is available."""
         upper_code = code.upper()
 
-        currencies = self.__available_currencies
+        currencies = self._available_currencies
         if not currencies:
             currencies = await self._redis_client.hgetall('available_currencies')
             if not currencies:

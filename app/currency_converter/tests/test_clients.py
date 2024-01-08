@@ -80,11 +80,11 @@ class TestExchangerateClientGetRate:
     base = 'USD'
     target = 'EUR'
 
-    async def test_successful_response(self, mock_exchangerate_client_get):
+    async def test_successful_response(self, mock_client_get):
         """Successful response."""
         result = await ExchangerateClient().get_rate(base=self.base, target=self.target)
         assert result == 1.278342
-        mock_exchangerate_client_get.assert_awaited_once_with(
+        mock_client_get.assert_awaited_once_with(
             urljoin(settings.EXCHANGERATE_URL.unicode_string(), 'live'),
             params={'source': self.base, 'currencies': self.target},
         )
@@ -93,9 +93,9 @@ class TestExchangerateClientGetRate:
         {'success': True, 'wrong_key': 'wrong_value'},
         {'success': True, 'quotes': {'wrong_key': 'wrong_value'}},
     ])
-    async def test_wrong_json_response(self, mock_exchangerate_client_get, json):
+    async def test_wrong_json_response(self, mock_client_get, json):
         """Unsuccessful response with unexpected json."""
-        mock_exchangerate_client_get.return_value = json
+        mock_client_get.return_value = json
         with pytest.raises(ExchangerateClient.UnknownClientError) as exc:
             await ExchangerateClient().get_rate(base=self.base, target=self.target)
         assert exc.value.message == 'Unknown error from third party service.'
@@ -104,9 +104,9 @@ class TestExchangerateClientGetRate:
         ExchangerateClient.ClientError,
         ExchangerateClient.UnknownClientError,
     ])
-    async def test_exception_from_method_get(self, mock_exchangerate_client_get, exc_class):
+    async def test_exception_from_method_get(self, mock_client_get, exc_class):
         """Exception occurred in method _get."""
-        mock_exchangerate_client_get.side_effect = exc_class('message')
+        mock_client_get.side_effect = exc_class('message')
         with pytest.raises(exc_class):
             await ExchangerateClient().get_rate(base=self.base, target=self.target)
 
@@ -114,9 +114,9 @@ class TestExchangerateClientGetRate:
 class TestExchangerateClientGetAvailable:
     """Testing method get_available_currencies of ExchangerateClient."""
 
-    async def test_successful_response(self, mock_exchangerate_client_get):
+    async def test_successful_response(self, mock_client_get):
         """Successful response."""
-        mock_exchangerate_client_get.return_value = {
+        mock_client_get.return_value = {
             'success': True,
             'currencies': {
                 'USD': 'USD description',
@@ -125,14 +125,14 @@ class TestExchangerateClientGetAvailable:
         }
         result = await ExchangerateClient().get_available_currencies()
 
-        mock_exchangerate_client_get.assert_awaited_once_with(
+        mock_client_get.assert_awaited_once_with(
             urljoin(settings.EXCHANGERATE_URL.unicode_string(), 'list'),
         )
         assert result == {'USD': 'USD description', 'EUR': 'EUR description'}
 
-    async def test_wrong_json_response(self, mock_exchangerate_client_get):
+    async def test_wrong_json_response(self, mock_client_get):
         """Unsuccessful response with unexpected json."""
-        mock_exchangerate_client_get.return_value = {'wrong_key': 'wrong_value'}
+        mock_client_get.return_value = {'wrong_key': 'wrong_value'}
         with pytest.raises(ExchangerateClient.UnknownClientError) as exc:
             await ExchangerateClient().get_available_currencies()
         assert exc.value.message == 'Unknown error from third party service.'
@@ -141,8 +141,8 @@ class TestExchangerateClientGetAvailable:
         ExchangerateClient.ClientError,
         ExchangerateClient.UnknownClientError,
     ])
-    async def test_exception_from_method_get(self, mock_exchangerate_client_get, exc_class):
+    async def test_exception_from_method_get(self, mock_client_get, exc_class):
         """Exception occurred in method _get."""
-        mock_exchangerate_client_get.side_effect = exc_class('message')
+        mock_client_get.side_effect = exc_class('message')
         with pytest.raises(exc_class):
             await ExchangerateClient().get_available_currencies()
