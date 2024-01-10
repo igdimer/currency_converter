@@ -1,8 +1,12 @@
+from unittest import mock
+
 import pytest
+import pytest_asyncio
 
 from app.currency_converter.clients import ExchangerateClient
 from app.currency_converter.services import CurrencyService
 from app.redis import redis_client
+from app.currency_converter.schemas import RateOutput
 
 
 class TestCurrencyServiceGetAvailableCurrencies:
@@ -115,3 +119,58 @@ class TestCurrencyServiceIsCurrencyAvailable:
         service = CurrencyService()
         assert await service.is_currency_available(code=code) is result
         mock_client_get_available_currencies.assert_awaited_once()
+
+
+class TestCurrencyServiceGetRate:
+    """Testing method get_rate of CurrencyService."""
+
+    base = 'EUR'
+    target = 'USD'
+
+    @pytest_asyncio.fixture
+    async def mock_is_currency_available(self):
+        """Mock fixture of method CurrencyService.is_currency_available()."""
+        with mock.patch(
+            'app.currency_converter.services.CurrencyService.is_currency_available',
+            return_value=True,
+        ) as method:
+            yield method
+
+    async def test_success(self, mock_is_currency_available, mock_client_get_rate):
+        """Successful execution."""
+        service = CurrencyService()
+        expected_result = RateOutput(
+            pair=self.base + self.target,
+            rate=0.55,
+            description=f'1 {self.base} = 0.55 {self.target}',
+        )
+
+        assert await service.get_rate(base=self.base, target=self.target) == expected_result
+        mock_is_currency_available.assert_any_await(code=self.base)
+        mock_is_currency_available.assert_any_await(code=self.target)
+        mock_client_get_rate.assert_awaited_once_with(base=self.base, target=self.target)
+
+    async def test_currency_not_available(self, mock_is_currency_available):
+        """Provided currencies are not available."""
+        mock_is_currency_available.return_value = False
+        service = CurrencyService()
+
+        with pytest.raises(CurrencyService.CurrencyNotAvailableError):
+            await service.get_rate(base=self.base, target=self.target)
+
+    @pytest.mark.parametrize('exc_class', [
+        ExchangerateClient.ClientError,
+        ExchangerateClient.UnknownClientError,
+    ])
+    async def test_client_error(
+        self,
+        mock_is_currency_available,
+        mock_client_get_rate,
+        exc_class,
+    ):
+        """ExchangerateClient raises error."""
+        service = CurrencyService()
+        mock_client_get_rate.side_effect = exc_class('message')
+
+        with pytest.raises(CurrencyService.ExchangerateClientError):
+            await service.get_rate(base=self.base, target=self.target)
