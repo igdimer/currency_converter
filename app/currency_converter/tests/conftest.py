@@ -69,5 +69,6 @@ async def mock_client_get_available_currencies():
         return_value={
             'USD': 'United States Dollar',
             'AMD': 'Armenian Dram',
-        }) as method:
+        },
+    ) as method:
         yield method

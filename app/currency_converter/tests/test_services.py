@@ -4,9 +4,9 @@ import pytest
 import pytest_asyncio
 
 from app.currency_converter.clients import ExchangerateClient
+from app.currency_converter.schemas import RateOutput
 from app.currency_converter.services import CurrencyService
 from app.redis import redis_client
-from app.currency_converter.schemas import RateOutput
 
 
 class TestCurrencyServiceGetAvailableCurrencies:
@@ -168,7 +168,7 @@ class TestCurrencyServiceGetRate:
         mock_client_get_rate,
         exc_class,
     ):
-        """ExchangerateClient raises error."""
+        """ExchangerateClient raises error."""  # noqa: D403
         service = CurrencyService()
         mock_client_get_rate.side_effect = exc_class('message')
 

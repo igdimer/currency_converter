@@ -78,6 +78,8 @@ pydantic-extra-types==2.1.0
     # via fastapi
 pydantic-settings==2.1.0
     # via fastapi
+pyjwt==2.8.0
+    # via -r requirements.in
 python-dotenv==1.0.0
     # via
     #   pydantic-settings
