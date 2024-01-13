@@ -29,15 +29,13 @@ class ExchangerateClient:
         self.url = settings.EXCHANGERATE_URL.unicode_string()
         self.access_key = settings.EXCHANGERATE_ACCESS_KEY
 
-    async def _get(self, url, params=None) -> ResponseDict:
+    async def _get(self, url: str, *, client: httpx.AsyncClient, params=None) -> ResponseDict:
         """Send GET request."""
         if not params:
-            params = {'access_key': self.access_key}
-        else:
-            params.update({'access_key': self.access_key})
+            params = {}
+        params.update({'access_key': self.access_key})
 
-        async with httpx.AsyncClient() as client:
-            response = await client.get(url, params=params)
+        response = await client.get(url, params=params)
         response_data = response.json()
 
         try:
@@ -55,7 +53,8 @@ class ExchangerateClient:
             'currencies': target,
         }
         url = urljoin(self.url, 'live')
-        response_data = await self._get(url, params=params)
+        async with httpx.AsyncClient() as client:
+            response_data = await self._get(url, client=client, params=params)
 
         pair = base + target
         try:
@@ -68,7 +67,9 @@ class ExchangerateClient:
     async def get_available_currencies(self) -> dict[str, str]:
         """Get list of available currencies."""
         url = urljoin(self.url, 'list')
-        response_data = await self._get(url)
+        async with httpx.AsyncClient() as client:
+            response_data = await self._get(url, client=client)
+
         try:
             currencies = response_data['currencies']
         except KeyError:
