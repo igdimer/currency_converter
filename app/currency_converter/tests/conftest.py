@@ -17,8 +17,8 @@ def event_loop():
 
 
 @pytest.fixture()
-async def setup_method():  # noqa: PT004
-    """Clear redis cache before tests."""
+async def teardown_method():  # noqa: PT004
+    """Clear redis cache after tests."""
     await redis_client.flushdb()
 
 

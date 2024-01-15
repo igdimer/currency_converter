@@ -2,8 +2,8 @@ import datetime as dt
 import hashlib
 from typing import Annotated
 
-from fastapi import Depends, Header
 import jwt
+from fastapi import Depends, Header
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -12,8 +12,8 @@ from app.config import settings
 from app.core.exceptions import BaseServiceError
 from app.database import DataBaseSession
 
-from .models import User
 from .exceptions import UnauthorizedError
+from .models import User
 
 
 class AuthService:

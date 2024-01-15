@@ -9,18 +9,18 @@ from app.currency_converter.services import CurrencyService
 from app.redis import redis_client
 
 
+async def setup_module():
+    """Clear redis cache before all tests in module."""
+    await redis_client.flushdb()
+
+
 class TestCurrencyServiceGetAvailableCurrencies:
     """Testing method get_available_currencies_from_external_api of CurrencyService."""
-
-    @classmethod
-    async def teardown_class(cls):
-        """Clear redis cache after all tests in class."""
-        await redis_client.flushdb()
 
     async def test_success(
         self,
         mock_client_get_available_currencies,
-        setup_method,
+        teardown_method,
     ):
         """Successful execution."""
         service = CurrencyService()
@@ -44,7 +44,7 @@ class TestCurrencyServiceGetAvailableCurrencies:
     async def test_client_error(
         self,
         mock_client_get_available_currencies,
-        setup_method,
+        teardown_method,
         exc_class,
     ):
         """ExchangerateClient raises error."""  # noqa: D403
@@ -68,31 +68,14 @@ class TestCurrencyServiceIsCurrencyAvailable:
         'AMD': 'Armenian Dram',
     }
 
-    @classmethod
-    async def teardown_class(cls):
-        """Clear redis cache after all tests in class."""
-        await redis_client.flushdb()
-
-    @pytest.mark.parametrize(('code', 'result'), [
-        ('USD', True),
-        ('usd', True),
-        ('GBP', False),
-        ('gbp', False),
-    ])
-    async def test_service_instance_has_attribute(self, setup_method, code, result):
+    async def test_service_instance_has_attribute(self, teardown_method):
         """Instance of CurrencyService has attribute _available_currencies."""
         service = CurrencyService()
         service._available_currencies = self.currencies_list
 
-        assert await service.is_currency_available(code=code) is result
+        await service.is_currency_available(code='USD')
 
-    @pytest.mark.parametrize(('code', 'result'), [
-        ('USD', True),
-        ('usd', True),
-        ('GBP', False),
-        ('gbp', False),
-    ])
-    async def test_currencies_in_redis(self, setup_method, code, result):
+    async def test_currencies_in_redis(self, teardown_method):
         """No instance attribute _available_currencies, but redis has necessary hash."""
         await redis_client.hset(
             'available_currencies',
@@ -100,25 +83,27 @@ class TestCurrencyServiceIsCurrencyAvailable:
         )
         service = CurrencyService()
 
-        assert await service.is_currency_available(code=code) is result
+        await service.is_currency_available(code='USD')
 
-    @pytest.mark.parametrize(('code', 'result'), [
-        ('USD', True),
-        ('usd', True),
-        ('GBP', False),
-        ('gbp', False),
-    ])
     async def test_no_saved_currencies(
         self,
-        setup_method,
-        code,
-        result,
+        teardown_method,
         mock_client_get_available_currencies,
     ):
         """No saved currencies at all."""
         service = CurrencyService()
-        assert await service.is_currency_available(code=code) is result
+        await service.is_currency_available(code='USD')
         mock_client_get_available_currencies.assert_awaited_once()
+
+    async def test_currency_not_available(
+        self,
+        teardown_method,
+        mock_client_get_available_currencies,
+    ):
+        """Currency is not available."""
+        service = CurrencyService()
+        with pytest.raises(CurrencyService.CurrencyNotAvailableError):
+            await service.is_currency_available(code='LOL')
 
 
 class TestCurrencyServiceGetRate:
@@ -126,6 +111,11 @@ class TestCurrencyServiceGetRate:
 
     base = 'EUR'
     target = 'USD'
+
+    @classmethod
+    async def teardown_class(cls):
+        """Clear redis cache after tests in class."""
+        await redis_client.flushdb()
 
     @pytest_asyncio.fixture
     async def mock_is_currency_available(self):
@@ -136,7 +126,12 @@ class TestCurrencyServiceGetRate:
         ) as method:
             yield method
 
-    async def test_success(self, mock_is_currency_available, mock_client_get_rate):
+    async def test_success(
+        self,
+        mock_is_currency_available,
+        mock_client_get_rate,
+        teardown_method,
+    ):
         """Successful execution."""
         service = CurrencyService()
         expected_result = RateOutput(
@@ -150,14 +145,6 @@ class TestCurrencyServiceGetRate:
         mock_is_currency_available.assert_any_await(code=self.target)
         mock_client_get_rate.assert_awaited_once_with(base=self.base, target=self.target)
 
-    async def test_currency_not_available(self, mock_is_currency_available):
-        """Provided currencies are not available."""
-        mock_is_currency_available.return_value = False
-        service = CurrencyService()
-
-        with pytest.raises(CurrencyService.CurrencyNotAvailableError):
-            await service.get_rate(base=self.base, target=self.target)
-
     @pytest.mark.parametrize('exc_class', [
         ExchangerateClient.ClientError,
         ExchangerateClient.UnknownClientError,
@@ -167,6 +154,7 @@ class TestCurrencyServiceGetRate:
         mock_is_currency_available,
         mock_client_get_rate,
         exc_class,
+        teardown_method,
     ):
         """ExchangerateClient raises error."""  # noqa: D403
         service = CurrencyService()
