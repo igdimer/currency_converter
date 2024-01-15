@@ -1,6 +1,8 @@
 import datetime as dt
 import hashlib
+from typing import Annotated
 
+from fastapi import Depends, Header
 import jwt
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
@@ -11,6 +13,7 @@ from app.core.exceptions import BaseServiceError
 from app.database import DataBaseSession
 
 from .models import User
+from .exceptions import UnauthorizedError
 
 
 class AuthService:
@@ -138,19 +141,19 @@ class AuthService:
     @classmethod
     async def authenticate(
         cls,
-        access_token: str,  # TODO with Header Authorization
+        authorization: Annotated[str, Header()],
         db_session: DataBaseSession,
-    ):
+    ) -> User:
         """Authenticate user by access token."""
+        access_token = authorization.split()[-1]
         try:
             decoded = jwt.decode(access_token, settings.JWT_TOKEN_SECRET, algorithms=['HS256'])
-        except jwt.InvalidTokenError as exc:
-            raise cls.InvalidTokenError() from exc
-
-        try:
             username: str = decoded['username']
-        except KeyError as exc:
-            raise cls.InvalidTokenError() from exc
+            user = await cls.get_user(username=username, db_session=db_session)
+        except (jwt.InvalidTokenError, KeyError, cls.UserNotFoundError) as exc:
+            raise UnauthorizedError from exc
 
-        user = await cls.get_user(username=username, db_session=db_session)
         return user
+
+
+AuthenticateUser = Annotated[User, Depends(AuthService.authenticate)]
