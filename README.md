@@ -16,11 +16,66 @@ Linters and tests: isort, flake8, mypy, pytest.
 
 ### API
 
-There is an endpoint for obtaining exchange rates.
+#### Registration and authentication
 
-```GET /api/rate?base=USD&target=EUR```
+```POST /api/signup``` - sign up as new user and get JWT access and refresh tokens
+
+_Request body JSON_
+
+```json
+{
+  "username": "your_username",
+  "password": "secure_password"
+}
+```
+
+```POST /api/login``` - log in by username and password and get JWT access and refresh tokens
+
+_Request body JSON_
+
+```json
+{
+  "username": "your_username",
+  "password": "secure_password"
+}
+```
+
+```POST /api/refresh_token``` - get new access token by refresh token
+
+_Request body JSON_
+
+```json
+{
+  "refresh_token": "your_jwt_refresh_token"
+}
+```
+
+#### Currencies
+
+```GET /api/rate?base=USD&target=EUR``` - obtain exchange rates
 
 Query parameters ```base``` and ```target``` are required and must be represented by a widely recognized three-letter alphabetical code.
+
+```POST /api/favorite_rates``` - create list of favorite currency pairs
+
+_Authorization Header: Bearer <jwt_access_token>_
+
+_Request body JSON_
+
+```json
+{
+  "pairs": [
+    {
+        "base": "RUB",
+        "target": "EUR"
+    },
+    {
+        "base": "USD",
+        "target": "BTC"
+    }
+  ]
+}
+```
 
 Documentation is available on http://127.0.0.1:8000/docs.
 
