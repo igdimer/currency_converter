@@ -42,3 +42,14 @@ async def create_favorite_pairs(
         raise exceptions.CurrencyNotAvailableError from exc
 
     return {'detail': 'Favorite currencies were saved.'}
+
+
+@converter_router.get('/favorite_rates', response_model=list[RateOutput])
+async def get_favorite_pairs(
+    user: AuthenticateUser,
+    db_session: DataBaseSession,
+):
+    """Get currency rates from favorite list."""
+    result = await CurrencyService().get_favorite_rates(user=user, db_session=db_session)
+    return FavoritePairList(pairs=result)
+

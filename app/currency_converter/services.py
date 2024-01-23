@@ -1,3 +1,4 @@
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.dialects.postgresql import insert
 
@@ -94,3 +95,11 @@ class CurrencyService:
 
         await db_session.execute(insert(FavoritePair).on_conflict_do_nothing(), pairs_dicts)
         await db_session.commit()
+
+    async def get_favorite_rates(self, *, user: User, db_session: AsyncSession):
+        """Get currency rates from favorite list."""
+        favorite_pairs = db_session.execute(select(User).where(User.id == user.id))
+        print(favorite_pairs)
+        return favorite_pairs
+
+
