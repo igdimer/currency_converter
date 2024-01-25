@@ -14,7 +14,7 @@ class TestExchangerateClientGet:
 
     async def test_params_none(self, mock_httpx_client):
         """Call without provided params."""
-        await ExchangerateClient()._get(test_url, client=mock_httpx_client)
+        await ExchangerateClient()._get(test_url)
 
         mock_httpx_client.get.assert_awaited_once_with(
             test_url,
@@ -23,11 +23,7 @@ class TestExchangerateClientGet:
 
     async def test_params_provided(self, mock_httpx_client):
         """Call with provided params."""
-        await ExchangerateClient()._get(
-            test_url,
-            client=mock_httpx_client,
-            params={'test_param': 'test_value'},
-        )
+        await ExchangerateClient()._get(test_url, params={'test_param': 'test_value'})
 
         mock_httpx_client.get.assert_awaited_once_with(
             test_url,
@@ -36,7 +32,7 @@ class TestExchangerateClientGet:
 
     async def test_successful_response(self, mock_httpx_client):
         """Successful response."""
-        response = await ExchangerateClient()._get(test_url, client=mock_httpx_client)
+        response = await ExchangerateClient()._get(test_url)
 
         assert response == {
             'success': True,
@@ -57,7 +53,7 @@ class TestExchangerateClientGet:
         )
 
         with pytest.raises(ExchangerateClient.ClientError) as exc:
-            await ExchangerateClient()._get(test_url, client=mock_httpx_client)
+            await ExchangerateClient()._get(test_url)
         assert exc.value.message == 'User requested a resource which does not exist.'
 
     @pytest.mark.parametrize('json', [
@@ -74,7 +70,7 @@ class TestExchangerateClientGet:
         )
 
         with pytest.raises(ExchangerateClient.UnknownClientError) as exc:
-            await ExchangerateClient()._get(test_url, client=mock_httpx_client)
+            await ExchangerateClient()._get(test_url)
         assert exc.value.message == 'Unknown error from third party service.'
 
 
@@ -87,10 +83,14 @@ class TestExchangerateClientGetRate:
     async def test_successful_response(self, mock_client_get, mock_httpx_client):
         """Successful response."""
         result = await ExchangerateClient().get_rate(base=self.base, target=self.target)
-        assert result == 1.278342
+        assert result == {
+            'base': self.base,
+            'target': self.target,
+            'pair': 'USDEUR',
+            'rate': 1.278342,
+        }
         mock_client_get.assert_awaited_once_with(
             urljoin(settings.EXCHANGERATE_URL.unicode_string(), 'live'),
-            client=mock_httpx_client,
             params={'source': self.base, 'currencies': self.target},
         )
 
@@ -132,7 +132,6 @@ class TestExchangerateClientGetAvailable:
 
         mock_client_get.assert_awaited_once_with(
             urljoin(settings.EXCHANGERATE_URL.unicode_string(), 'list'),
-            client=mock_httpx_client,
         )
         assert result == {'USD': 'USD description', 'EUR': 'EUR description'}
 

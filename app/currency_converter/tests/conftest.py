@@ -25,7 +25,10 @@ async def teardown_method():  # noqa: PT004
 @pytest_asyncio.fixture
 async def mock_httpx_client():
     """Mock fixture of httpx.AsyncClient."""
-    with mock.patch('app.currency_converter.clients.httpx.AsyncClient') as mock_client:
+    with mock.patch(
+            'app.currency_converter.clients.httpx.AsyncClient',
+            new=mock.AsyncMock,
+    ) as mock_client:
         mock_client.get = mock.AsyncMock(return_value=httpx.Response(
             status_code=200,
             json={
@@ -33,7 +36,6 @@ async def mock_httpx_client():
                 'quotes': {'USDEUR': 1.278342},
             },
         ))
-        mock_client.return_value.__aenter__.return_value = mock_client
         yield mock_client
 
 
@@ -56,7 +58,12 @@ async def mock_client_get_rate():
     """Mock fixture of method ExchangerateClient.get_rate()."""
     with mock.patch(
         'app.currency_converter.services.ExchangerateClient.get_rate',
-        return_value=0.55,
+        return_value={
+            'base': 'EUR',
+            'target': 'USD',
+            'pair': 'EURUSD',
+            'rate': 0.55,
+        },
     ) as method:
         yield method
 

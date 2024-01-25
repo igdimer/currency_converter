@@ -1,9 +1,10 @@
 from fastapi import APIRouter, Depends
+
 from app.database import DataBaseSession
 from app.users.services import AuthenticateUser
 
 from . import exceptions
-from .schemas import RateOutput, FavoritePairList, CurrencyPair
+from .schemas import CurrencyPair, FavoritePairList, RateOutput
 from .services import CurrencyService
 
 converter_router = APIRouter()
@@ -14,9 +15,11 @@ async def get_rate(
     currency_pair: CurrencyPair = Depends(),
 ):
     """Get currency rate."""
-    service = CurrencyService()
     try:
-        rate = await service.get_rate(base=currency_pair.base, target=currency_pair.target)
+        rate = await CurrencyService().get_rate(
+            base=currency_pair.base,
+            target=currency_pair.target,
+        )
     except CurrencyService.ExchangerateClientError as exc:
         raise exceptions.ExchangerateApiError(detail=exc.message) from exc
     except CurrencyService.CurrencyNotAvailableError as exc:
@@ -50,6 +53,9 @@ async def get_favorite_pairs(
     db_session: DataBaseSession,
 ):
     """Get currency rates from favorite list."""
-    result = await CurrencyService().get_favorite_rates(user=user, db_session=db_session)
-    return FavoritePairList(pairs=result)
+    try:
+        result = await CurrencyService().get_favorite_rates(user=user, db_session=db_session)
+    except CurrencyService.ExchangerateClientError as exc:
+        raise exceptions.ExchangerateApiError(detail=exc.message) from exc
 
+    return result

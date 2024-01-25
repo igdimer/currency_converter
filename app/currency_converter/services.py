@@ -1,6 +1,8 @@
+import asyncio
+
 from sqlalchemy import select
-from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.dialects.postgresql import insert
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.exceptions import BaseServiceError
 from app.redis import redis_client
@@ -28,15 +30,15 @@ class CurrencyService:
 
     async def get_available_currencies_from_external_api(self) -> dict[str, str]:
         """Get available currencies from Exchangerate API and save into cache."""
-        client = ExchangerateClient()
-        try:
-            currencies = await client.get_available_currencies()
-        except (ExchangerateClient.ClientError, ExchangerateClient.UnknownClientError) as exc:
-            raise self.ExchangerateClientError(message=exc.message) from exc
+        async with ExchangerateClient() as client:
+            try:
+                currencies = await client.get_available_currencies()
+            except (ExchangerateClient.ClientError, ExchangerateClient.UnknownClientError) as exc:
+                raise self.ExchangerateClientError(message=exc.message) from exc
 
         await self._redis_client.hset(
             'available_currencies',
-            mapping=currencies,  # type: ignore[arg-type]
+            mapping=currencies,
         )
         await self._redis_client.aclose()  # type: ignore[attr-defined]
 
@@ -61,14 +63,16 @@ class CurrencyService:
         for code in [base, target]:
             await self.is_currency_available(code=code)
 
-        client = ExchangerateClient()
-        try:
-            rate = await client.get_rate(base=base, target=target)
-        except (ExchangerateClient.ClientError, ExchangerateClient.UnknownClientError) as exc:
-            raise self.ExchangerateClientError(message=exc.message) from exc
+        async with ExchangerateClient() as client:
+            try:
+                result = await client.get_rate(base=base, target=target)
+            except (ExchangerateClient.ClientError, ExchangerateClient.UnknownClientError) as exc:
+                raise self.ExchangerateClientError(message=exc.message) from exc
+
+        rate = result['rate']
 
         return RateOutput(
-            pair=base + target,
+            pair=result['pair'],
             rate=rate,
             description=f'1 {base} = {rate} {target}',
         )
@@ -98,8 +102,30 @@ class CurrencyService:
 
     async def get_favorite_rates(self, *, user: User, db_session: AsyncSession):
         """Get currency rates from favorite list."""
-        favorite_pairs = db_session.execute(select(User).where(User.id == user.id))
-        print(favorite_pairs)
-        return favorite_pairs
+        favorite_pairs = await db_session.scalars(
+            select(FavoritePair).where(FavoritePair.user_id == user.id),
+        )
 
+        tasks = []
+        async with ExchangerateClient() as client:
+            for pair in favorite_pairs:
+                tasks.append(client.get_rate(base=pair.base, target=pair.target))
 
+            try:
+                result_rates = await asyncio.gather(*tasks)
+            except (ExchangerateClient.ClientError, ExchangerateClient.UnknownClientError) as exc:
+                raise self.ExchangerateClientError(message=exc.message) from exc
+
+        result = []
+        for item in result_rates:
+            rate = item['rate']
+            base = item['base']
+            target = item['target']
+
+            result.append(RateOutput(
+                pair=item['pair'],
+                rate=rate,
+                description=f'1 {base} = {rate} {target}',
+            ))
+
+        return result

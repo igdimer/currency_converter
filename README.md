@@ -77,6 +77,10 @@ _Request body JSON_
 }
 ```
 
+```GET /api/favorite_rates``` - get currency rates from favorite list
+
+_Authorization Header: Bearer <jwt_access_token>_
+
 Documentation is available on http://127.0.0.1:8000/docs.
 
 ***The project is evolving, new features are coming soon.***
