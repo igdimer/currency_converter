@@ -11,6 +11,7 @@ API for obtaining currency exchange rates. Service uses external API https://exc
 - Redis
 - Docker
 - alembic
+- httpx
 
 Linters and tests: isort, flake8, mypy, pytest.
 
