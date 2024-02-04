@@ -8,6 +8,8 @@ anyio==3.7.1
     # via
     #   -c requirements.txt
     #   httpx
+async-factory-boy==1.0.1
+    # via -r requirements.dev.in
 attrs==23.1.0
     # via flake8-bugbear
 bandit==1.7.6
@@ -43,7 +45,9 @@ cryptography==41.0.7
 darglint==1.8.1
     # via -r requirements.dev.in
 factory-boy==3.3.0
-    # via -r requirements.dev.in
+    # via
+    #   -r requirements.dev.in
+    #   async-factory-boy
 faker==20.1.0
     # via factory-boy
 flake8==6.1.0

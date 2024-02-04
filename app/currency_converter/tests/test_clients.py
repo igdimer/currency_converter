@@ -9,6 +9,7 @@ from app.currency_converter.clients import ExchangerateClient
 test_url = 'http://test-url'
 
 
+@pytest.mark.asyncio()
 class TestExchangerateClientGet:
     """Testing method _get of ExchangerateClient."""
 
@@ -74,6 +75,7 @@ class TestExchangerateClientGet:
         assert exc.value.message == 'Unknown error from third party service.'
 
 
+@pytest.mark.asyncio()
 class TestExchangerateClientGetRate:
     """Testing method get_rate of ExchangerateClient."""
 
@@ -116,6 +118,7 @@ class TestExchangerateClientGetRate:
             await ExchangerateClient().get_rate(base=self.base, target=self.target)
 
 
+@pytest.mark.asyncio()
 class TestExchangerateClientGetAvailable:
     """Testing method get_available_currencies of ExchangerateClient."""
 

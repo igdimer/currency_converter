@@ -6,6 +6,7 @@ class Settings(BaseSettings):
     """Application settings."""
 
     DATABASE_DSN: PostgresDsn
+    DATABASE_TEST_DSN: PostgresDsn
     REDIS_DSN: RedisDsn
     EXCHANGERATE_URL: HttpUrl
     EXCHANGERATE_ACCESS_KEY: str
