@@ -7,6 +7,7 @@ import pytest_asyncio
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 
 from app.config import settings
+from app.currency_converter.schemas import RateOutput
 from app.database import Base
 from app.redis import redis_client
 from app.users.tests.factories import favorite_pair_factory, user_factory  # noqa: F401
@@ -88,7 +89,6 @@ async def mock_httpx_client():
         yield mock_client
 
 
-# TODO Refactor as one Mock client
 @pytest_asyncio.fixture
 async def mock_client_get():
     """Mock fixture of method ExchangerateClient._get()."""
@@ -138,3 +138,17 @@ async def mock_is_currency_available():
         return_value=True,
     ) as method:
         yield method
+
+
+@pytest_asyncio.fixture
+async def mock_currency_service_get_rate():
+    """Mock fixture of method get_rate of CurrencyService."""
+    with mock.patch(
+        'app.currency_converter.routes.CurrencyService.get_rate',
+        return_value=RateOutput(
+            pair='BTCUSD',
+            rate=40000,
+            description='1 BTC = 40000 USD',
+        ),
+    ) as mock_service:
+        yield mock_service

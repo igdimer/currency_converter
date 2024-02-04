@@ -28,7 +28,7 @@ class CurrencyService:
         self._available_currencies: dict[str, str] | None = None
         self._redis_client = redis_client
 
-    async def get_available_currencies_from_external_api(self) -> dict[str, str]:
+    async def _get_available_currencies_from_external_api(self) -> dict[str, str]:
         """Get available currencies from Exchangerate API and save into cache."""
         async with ExchangerateClient() as client:
             try:
@@ -52,7 +52,7 @@ class CurrencyService:
         if not currencies:
             currencies = await self._redis_client.hgetall('available_currencies')
             if not currencies:
-                currencies = await self.get_available_currencies_from_external_api()
+                currencies = await self._get_available_currencies_from_external_api()
             await self._redis_client.aclose()  # type: ignore[attr-defined]
 
         if code not in currencies:

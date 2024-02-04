@@ -20,7 +20,7 @@ class TestCurrencyServiceGetAvailableCurrencies:
         assert service._available_currencies is None
         assert await service._redis_client.exists('available_currencies') == 0
 
-        result = await service.get_available_currencies_from_external_api()
+        result = await service._get_available_currencies_from_external_api()
         expected_result = {
             'USD': 'United States Dollar',
             'AMD': 'Armenian Dram',
@@ -42,7 +42,7 @@ class TestCurrencyServiceGetAvailableCurrencies:
 
         mock_client_get_available_currencies.side_effect = exc_class('message')
         with pytest.raises(CurrencyService.ExchangerateClientError):
-            await service.get_available_currencies_from_external_api()
+            await service._get_available_currencies_from_external_api()
 
         assert service._available_currencies is None
         assert await service._redis_client.exists('available_currencies') == 0
