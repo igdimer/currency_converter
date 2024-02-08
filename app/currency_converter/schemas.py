@@ -22,7 +22,7 @@ class CurrencyPair(BaseSchema):
     @field_validator('base', 'target')
     @classmethod
     def code_upper(cls, value):
-        """Return a copy of the stgring converted to uppercase."""
+        """Return a copy of the string converted to uppercase."""
         return value.upper()
 
     @field_validator('base', 'target')
@@ -45,6 +45,15 @@ class FavoritePairList(BaseSchema):
     """Schema for list of favorite currency pairs."""
 
     pairs: list[CurrencyPair]
+
+    @model_validator(mode='before')
+    @classmethod
+    def pairs_not_empty(cls, data):
+        """Check provided pairs list is not empty."""
+        if not data['pairs']:
+            raise ValueError('Provided pairs list is empty.')
+
+        return data
 
     @model_validator(mode='after')
     def remove_duplicates(self):

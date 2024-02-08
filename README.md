@@ -57,7 +57,7 @@ _Request body JSON_
 
 Query parameters ```base``` and ```target``` are required and must be represented by a widely recognized three-letter alphabetical code.
 
-```POST /api/favorite_rates``` - create list of favorite currency pairs
+```POST /api/favorite_rates``` - add favorite currency pairs
 
 _Authorization Header: Bearer <jwt_access_token>_
 
@@ -81,6 +81,27 @@ _Request body JSON_
 ```GET /api/favorite_rates``` - get currency rates from favorite list
 
 _Authorization Header: Bearer <jwt_access_token>_
+
+```DELETE /api/favorite_rates``` - delete favorite currency pairs
+
+_Authorization Header: Bearer <jwt_access_token>_
+
+_Request body JSON_
+
+```json
+{
+  "pairs": [
+    {
+        "base": "RUB",
+        "target": "EUR"
+    },
+    {
+        "base": "USD",
+        "target": "BTC"
+    }
+  ]
+}
+```
 
 Documentation is available on http://127.0.0.1:8000/docs.
 

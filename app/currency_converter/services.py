@@ -1,6 +1,6 @@
 import asyncio
 
-from sqlalchemy import select
+from sqlalchemy import and_, delete, or_, select
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -129,3 +129,26 @@ class CurrencyService:
             ))
 
         return result
+
+    async def delete_favorite_pairs(
+        self,
+        *,
+        user: User,
+        db_session: AsyncSession,
+        pairs: list[CurrencyPair],
+    ):
+        """Remove currency rates from favorite list."""
+        conditions = []
+        for pair in pairs:
+            condition = and_(FavoritePair.base == pair.base, FavoritePair.target == pair.target)
+            conditions.append(condition)
+
+        result = await db_session.execute(
+            delete(FavoritePair).where(FavoritePair.user_id == user.id).where(or_(*conditions)),
+        )
+        await db_session.commit()
+        message = ('Provided pairs were not found.'
+                   if result.rowcount == 0
+                   else 'Pairs were deleted.')
+
+        return message

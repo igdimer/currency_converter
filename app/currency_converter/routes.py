@@ -59,3 +59,19 @@ async def get_favorite_pairs(
         raise exceptions.ExchangerateApiError(detail=exc.message) from exc
 
     return result
+
+
+@converter_router.delete('/favorite_rates')
+async def delete_favorite_pairs(
+    user: AuthenticateUser,
+    db_session: DataBaseSession,
+    favorite_list: FavoritePairList,
+):
+    """Delete favorite currency pair."""
+    result = await CurrencyService().delete_favorite_pairs(
+        user=user,
+        db_session=db_session,
+        pairs=favorite_list.pairs,
+    )
+
+    return {'detail': result}
