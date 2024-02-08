@@ -77,14 +77,14 @@ class CurrencyService:
             description=f'1 {base} = {rate} {target}',
         )
 
-    async def create_favorite_list(
+    async def add_favorite_list(
         self,
         *,
         user: User,
         db_session: AsyncSession,
         pairs: list[CurrencyPair],
     ):
-        """Create list of favorite currency pairs."""
+        """Add favorite currency pairs."""
         pairs_dicts = []
         currencies_set = set()
 

@@ -153,7 +153,7 @@ class TestCurrencyServiceCreateFavoriteList:
         """Successful creation."""
         user = await user_factory()
 
-        await CurrencyService().create_favorite_list(
+        await CurrencyService().add_favorite_list(
             user=user,
             db_session=db_session,
             pairs=self.default_pairs,
@@ -183,7 +183,7 @@ class TestCurrencyServiceCreateFavoriteList:
         mock_is_currency_available.side_effect = CurrencyService.CurrencyNotAvailableError()
 
         with pytest.raises(CurrencyService.CurrencyNotAvailableError):
-            await CurrencyService().create_favorite_list(
+            await CurrencyService().add_favorite_list(
                 user=user,
                 db_session=db_session,
                 pairs=self.default_pairs,
@@ -200,7 +200,7 @@ class TestCurrencyServiceCreateFavoriteList:
         user = await user_factory()
         await favorite_pair_factory(user=user, base='USD', target='AMD')
 
-        await CurrencyService().create_favorite_list(
+        await CurrencyService().add_favorite_list(
             user=user,
             db_session=db_session,
             pairs=self.default_pairs,

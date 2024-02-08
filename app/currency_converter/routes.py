@@ -29,14 +29,14 @@ async def get_rate(
 
 
 @converter_router.post('/favorite_rates')
-async def create_favorite_pairs(
+async def add_favorite_pairs(
     user: AuthenticateUser,
     db_session: DataBaseSession,
     favorite_list: FavoritePairList,
 ):
-    """Create list of favorite currency pairs."""
+    """Add favorite currency pairs."""
     try:
-        await CurrencyService().create_favorite_list(
+        await CurrencyService().add_favorite_list(
             user=user,
             db_session=db_session,
             pairs=favorite_list.pairs,
