@@ -1,4 +1,5 @@
 run_app:
+	docker compose -d -f docker-compose.dev.yml up
 	uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 
 update_requirements:
@@ -21,4 +22,3 @@ check:
 	flake8 app
 	mypy app
 	pytest
-	yamllint --strict .

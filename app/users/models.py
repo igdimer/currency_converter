@@ -7,7 +7,7 @@ from app.core.models import BaseModel
 class User(BaseModel):
     """User model class."""
 
-    __tablename__ = 'users'
+    __tablename__ = 'user'
 
     username = Column(String(100), unique=True, nullable=False)
     password = Column(String(64), nullable=False)
@@ -18,7 +18,7 @@ class User(BaseModel):
 class FavoritePair(BaseModel):
     """Model class for storing users favorite pairs."""
 
-    __tablename__ = 'favorite_pairs'
+    __tablename__ = 'favorite_pair'
 
     user_id = Column(
         BigInteger,

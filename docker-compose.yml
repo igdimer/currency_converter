@@ -6,7 +6,7 @@ services:
     volumes:
       - pg_data:/var/lib/postgresql/data
     environment:
-      POSTGRES_DB: currency_converter
+      POSTGRES_DB: converter_db
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
     ports:
@@ -23,7 +23,10 @@ services:
     build:
       context: .
       dockerfile: docker/Dockerfile
-    command: uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+    command: >
+      bash -c "alembic upgrade head
+      && uvicorn app.main:app --reload --host 0.0.0.0 --port 8000"
+
     volumes:
       - .:/app
       - ./.env.example:/app/.env
