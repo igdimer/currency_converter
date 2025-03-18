@@ -113,6 +113,5 @@ If you'd like to launch project on your own machine, after cloning repository yo
 
 - Get access key on https://exchangerate.host/
 - Set environment variable EXCHANGERATE_ACCESS_KEY to obtained access key in file ```env.example``` (or you can set it in file ```.env``` inside the container ```web``` after docker run)
-- Run ```docker-compose up```
-- Inside the container ```web``` execute command ```alembic upgrade head```
+- Run ```docker compose up```
  
