@@ -1,4 +1,5 @@
-from pydantic import field_validator, model_validator
+from pydantic import field_validator
+from pydantic import model_validator
 
 from app.core.schemas import BaseSchema
 

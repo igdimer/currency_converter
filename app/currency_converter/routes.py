@@ -1,13 +1,16 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter
+from fastapi import Depends
 
 from app.database import DataBaseSession
 from app.users.services import AuthenticateUser
 
 from . import exceptions
-from .schemas import CurrencyPair, FavoritePairList, RateOutput
+from .schemas import CurrencyPair
+from .schemas import FavoritePairList
+from .schemas import RateOutput
 from .services import CurrencyService
 
-converter_router = APIRouter()
+converter_router = APIRouter(tags=['Rates'])
 
 
 @converter_router.get('/rate', response_model=RateOutput)

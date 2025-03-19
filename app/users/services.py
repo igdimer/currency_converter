@@ -3,7 +3,8 @@ import hashlib
 from typing import Annotated
 
 import jwt
-from fastapi import Depends, Header
+from fastapi import Depends
+from fastapi import Header
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession

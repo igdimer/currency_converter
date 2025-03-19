@@ -4,13 +4,15 @@ import pytest
 from sqlalchemy import select
 
 from app.currency_converter.clients import ExchangerateClient
-from app.currency_converter.schemas import CurrencyPair, RateOutput
+from app.currency_converter.schemas import CurrencyPair
+from app.currency_converter.schemas import RateOutput
 from app.currency_converter.services import CurrencyService
 from app.redis import redis_client
-from app.users.models import FavoritePair, User
+from app.users.models import FavoritePair
+from app.users.models import User
 
 
-@pytest.mark.asyncio()
+@pytest.mark.asyncio
 class TestCurrencyServiceGetAvailableCurrencies:
     """Testing method get_available_currencies_from_external_api of CurrencyService."""
 
@@ -27,7 +29,8 @@ class TestCurrencyServiceGetAvailableCurrencies:
         }
 
         assert result == expected_result
-        assert await service._redis_client.hgetall('available_currencies') == expected_result
+        assert (await service._redis_client.hgetall('available_currencies')
+                == expected_result)  # type: ignore
         assert service._available_currencies == expected_result
 
     @pytest.mark.parametrize('exc_class', [
@@ -48,7 +51,7 @@ class TestCurrencyServiceGetAvailableCurrencies:
         assert await service._redis_client.exists('available_currencies') == 0
 
 
-@pytest.mark.asyncio()
+@pytest.mark.asyncio
 class TestCurrencyServiceIsCurrencyAvailable:
     """Testing method is_currency_available of CurrencyService."""
 
@@ -90,7 +93,7 @@ class TestCurrencyServiceIsCurrencyAvailable:
             await service.is_currency_available(code='LOL')
 
 
-@pytest.mark.asyncio()
+@pytest.mark.asyncio
 class TestCurrencyServiceGetRate:
     """Testing method get_rate of CurrencyService."""
 
@@ -140,7 +143,7 @@ class TestCurrencyServiceGetRate:
             await service.get_rate(base=self.base, target=self.target)
 
 
-@pytest.mark.asyncio()
+@pytest.mark.asyncio
 class TestCurrencyServiceCreateFavoriteList:
     """Testing method create_favorite_list of CurrencyService."""
 
@@ -222,7 +225,7 @@ class TestCurrencyServiceCreateFavoriteList:
         assert pair2.user_id == user.id
 
 
-@pytest.mark.asyncio()
+@pytest.mark.asyncio
 class TestCurrencyServiceGetFavoritePairs:
     """Testing method get_favorite_list of CurrencyService."""
 

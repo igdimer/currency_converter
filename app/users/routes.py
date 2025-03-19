@@ -1,6 +1,8 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Body
+from fastapi import APIRouter
+from fastapi import Body
+from fastapi import Depends
 
 from app.database import DataBaseSession
 
@@ -8,7 +10,7 @@ from . import exceptions
 from .schemas import TokensOutput
 from .services import AuthService
 
-users_router = APIRouter()
+users_router = APIRouter(prefix='/users', tags=['Users'])
 
 
 @users_router.post('/signup', response_model=TokensOutput)
@@ -16,6 +18,7 @@ async def signup(
     db_session: DataBaseSession,
     username: Annotated[str, Body()],
     password: Annotated[str, Body()],
+    service: AuthService = Depends(),
 ):
     """Registration on service."""
     try:

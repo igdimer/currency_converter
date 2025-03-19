@@ -1,4 +1,8 @@
-from sqlalchemy import BigInteger, Column, ForeignKey, String, UniqueConstraint
+from sqlalchemy import BigInteger
+from sqlalchemy import Column
+from sqlalchemy import ForeignKey
+from sqlalchemy import String
+from sqlalchemy import UniqueConstraint
 from sqlalchemy.orm import relationship
 
 from app.core.models import BaseModel
@@ -22,7 +26,7 @@ class FavoritePair(BaseModel):
 
     user_id = Column(
         BigInteger,
-        ForeignKey('users.id', ondelete='CASCADE'),
+        ForeignKey('user.id', ondelete='CASCADE'),
         nullable=False,
         index=True,
     )

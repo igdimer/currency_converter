@@ -1,15 +1,20 @@
 import asyncio
 
-from sqlalchemy import and_, delete, or_, select
+from sqlalchemy import and_
+from sqlalchemy import delete
+from sqlalchemy import or_
+from sqlalchemy import select
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.exceptions import BaseServiceError
 from app.redis import redis_client
-from app.users.models import FavoritePair, User
+from app.users.models import FavoritePair
+from app.users.models import User
 
 from .clients import ExchangerateClient
-from .schemas import CurrencyPair, RateOutput
+from .schemas import CurrencyPair
+from .schemas import RateOutput
 
 
 class CurrencyService:
@@ -50,7 +55,7 @@ class CurrencyService:
         """Check whether currency is available."""
         currencies = self._available_currencies
         if not currencies:
-            currencies = await self._redis_client.hgetall('available_currencies')
+            currencies = await self._redis_client.hgetall('available_currencies')  # type: ignore
             if not currencies:
                 currencies = await self._get_available_currencies_from_external_api()
             await self._redis_client.aclose()  # type: ignore[attr-defined]
