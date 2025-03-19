@@ -1,6 +1,9 @@
 run_app:
-	docker compose -d -f docker-compose.dev.yml up
+	docker compose -f docker-compose.dev.yml up -d
 	uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+
+stop:
+	docker compose -f docker-compose.dev.yml stop
 
 update_requirements:
 	pip-compile && pip-compile requirements.dev.in

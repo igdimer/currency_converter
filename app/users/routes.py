@@ -1,6 +1,8 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Body
+from fastapi import APIRouter
+from fastapi import Body
+from fastapi import Depends
 
 from app.database import DataBaseSession
 
@@ -8,7 +10,7 @@ from . import exceptions
 from .schemas import TokensOutput
 from .services import AuthService
 
-users_router = APIRouter()
+users_router = APIRouter(prefix='/users', tags=['Users'])
 
 
 @users_router.post('/signup', response_model=TokensOutput)
@@ -16,10 +18,11 @@ async def signup(
     db_session: DataBaseSession,
     username: Annotated[str, Body()],
     password: Annotated[str, Body()],
+    service: AuthService = Depends(),
 ):
     """Registration on service."""
     try:
-        tokens = await AuthService.signup(
+        tokens = await service.signup(
             username=username,
             password=password,
             db_session=db_session,
@@ -35,10 +38,11 @@ async def login(
     db_session: DataBaseSession,
     username: Annotated[str, Body()],
     password: Annotated[str, Body()],
+    service: AuthService = Depends(),
 ):
     """Login and get tokens."""
     try:
-        tokens = await AuthService.login(
+        tokens = await service.login(
             username=username,
             password=password,
             db_session=db_session,
@@ -55,10 +59,11 @@ async def login(
 async def refresh_tokens(
     db_session: DataBaseSession,
     refresh_token: Annotated[str, Body(embed=True)],
+    service: AuthService = Depends(),
 ):
     """Refresh tokens by refresh token."""
     try:
-        tokens = await AuthService.refresh_token(
+        tokens = await service.refresh_token(
             refresh_token=refresh_token,
             db_session=db_session,
         )

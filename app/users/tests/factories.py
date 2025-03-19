@@ -1,11 +1,13 @@
-import factory
 import pytest
 from async_factory_boy.factory.sqlalchemy import AsyncSQLAlchemyFactory
+from factory.declarations import Sequence
+from factory.declarations import SubFactory
 
-from app.users.models import FavoritePair, User
+from app.users.models import FavoritePair
+from app.users.models import User
 
 
-@pytest.fixture()
+@pytest.fixture
 def user_factory(db_session):
     """User factory fixture."""
     class UserFactory(AsyncSQLAlchemyFactory):
@@ -15,17 +17,17 @@ def user_factory(db_session):
             model = User
             sqlalchemy_session = db_session
 
-        username = factory.Sequence(lambda n: f'user{n}')
+        username = Sequence(lambda n: f'user{n}')  # type: ignore[no-untyped-call]
         password = 'hashed_password'  # noqa: S105
 
     return UserFactory
 
 
-@pytest.fixture()
+@pytest.fixture
 def favorite_pair_factory(db_session, user_factory):
     """Favorite pair factory fixture."""
     class FavoritePairFactory(AsyncSQLAlchemyFactory):
-        """User factory fixture."""
+        """Favorite pair factory fixture."""
 
         class Meta:
             model = FavoritePair
@@ -33,6 +35,6 @@ def favorite_pair_factory(db_session, user_factory):
 
         base = 'BTC'
         target = 'USD'
-        user = factory.SubFactory(user_factory)
+        user = SubFactory(user_factory)  # type: ignore[no-untyped-call]
 
     return FavoritePairFactory

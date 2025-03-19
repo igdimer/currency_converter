@@ -4,13 +4,15 @@ from unittest import mock
 import httpx
 import pytest
 import pytest_asyncio
-from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
+from sqlalchemy.ext.asyncio import async_sessionmaker
+from sqlalchemy.ext.asyncio import create_async_engine
 
 from app.config import settings
 from app.currency_converter.schemas import RateOutput
 from app.database import Base
 from app.redis import redis_client
-from app.users.tests.factories import favorite_pair_factory, user_factory  # noqa: F401
+from app.users.tests.factories import favorite_pair_factory  # noqa: F401
+from app.users.tests.factories import user_factory  # noqa: F401
 
 db_engine = create_async_engine(settings.DATABASE_TEST_DSN.unicode_string())
 

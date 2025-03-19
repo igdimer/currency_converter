@@ -1,6 +1,8 @@
 import datetime
 
-from sqlalchemy import BigInteger, Column, DateTime
+from sqlalchemy import BigInteger
+from sqlalchemy import Column
+from sqlalchemy import DateTime
 from sqlalchemy.orm import configure_mappers
 
 from app.database import Base
