@@ -16,10 +16,11 @@ converter_router = APIRouter(tags=['Rates'])
 @converter_router.get('/rate', response_model=RateOutput)
 async def get_rate(
     currency_pair: CurrencyPair = Depends(),
+    service: CurrencyService = Depends(),
 ):
     """Get currency rate."""
     try:
-        rate = await CurrencyService().get_rate(
+        rate = await service.get_rate(
             base=currency_pair.base,
             target=currency_pair.target,
         )
@@ -36,10 +37,11 @@ async def add_favorite_pairs(
     user: AuthenticateUser,
     db_session: DataBaseSession,
     favorite_list: FavoritePairList,
+    service: CurrencyService = Depends(),
 ):
     """Add favorite currency pairs."""
     try:
-        await CurrencyService().add_favorite_list(
+        await service.add_favorite_list(
             user=user,
             db_session=db_session,
             pairs=favorite_list.pairs,
@@ -54,10 +56,11 @@ async def add_favorite_pairs(
 async def get_favorite_pairs(
     user: AuthenticateUser,
     db_session: DataBaseSession,
+    service: CurrencyService = Depends(),
 ):
     """Get currency rates from favorite list."""
     try:
-        result = await CurrencyService().get_favorite_rates(user=user, db_session=db_session)
+        result = await service.get_favorite_rates(user=user, db_session=db_session)
     except CurrencyService.ExchangerateClientError as exc:
         raise exceptions.ExchangerateApiError(detail=exc.message) from exc
 
@@ -69,9 +72,10 @@ async def delete_favorite_pairs(
     user: AuthenticateUser,
     db_session: DataBaseSession,
     favorite_list: FavoritePairList,
+    service: CurrencyService = Depends(),
 ):
     """Delete favorite currency pair."""
-    result = await CurrencyService().delete_favorite_pairs(
+    result = await service.delete_favorite_pairs(
         user=user,
         db_session=db_session,
         pairs=favorite_list.pairs,
