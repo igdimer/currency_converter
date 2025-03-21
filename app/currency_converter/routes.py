@@ -4,13 +4,14 @@ from fastapi import Depends
 from app.database import DataBaseSession
 from app.users.services import AuthenticateUser
 
+from app.core.utils import parse_query_parameters_as_list_int
 from . import exceptions
 from .schemas import CurrencyPair
 from .schemas import FavoritePairListCreate
 from .schemas import RateOutput, FavoritePairOutput
 from .services import CurrencyService
 
-converter_router = APIRouter(prefix='/currencies', tags=['Rates'])
+converter_router = APIRouter(prefix='/currencies', tags=['Currencies'])
 
 
 @converter_router.get('/rate', response_model=RateOutput)
@@ -71,14 +72,14 @@ async def get_favorite_pairs(
 async def delete_favorite_pairs(
     user: AuthenticateUser,
     db_session: DataBaseSession,
-    favorite_list: FavoritePairListCreate,
+    favorite_list: list[int] = Depends(parse_query_parameters_as_list_int),
     service: CurrencyService = Depends(),
 ):
     """Delete favorite currency pair."""
     result = await service.delete_favorite_pairs(
         user=user,
         db_session=db_session,
-        pairs=favorite_list.pairs,
+        pairs=favorite_list,
     )
 
     return {'detail': result}
