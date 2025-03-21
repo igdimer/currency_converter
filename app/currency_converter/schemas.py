@@ -14,6 +14,15 @@ class RateOutput(BaseSchema):
     description: str
 
 
+class FavoritePairOutput(BaseSchema):
+    """Response model for favorite currency rate."""
+
+    id: int
+    pair: str
+    rate: float
+    description: str
+
+
 class CurrencyPair(BaseSchema):
     """Schema for a pair of currencies."""
 
@@ -42,8 +51,8 @@ class CurrencyPair(BaseSchema):
         return value
 
 
-class FavoritePairList(BaseSchema):
-    """Schema for list of favorite currency pairs."""
+class FavoritePairListCreate(BaseSchema):
+    """Schema for creating favorite currency pairs."""
 
     pairs: list[CurrencyPair]
 

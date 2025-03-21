@@ -6,11 +6,11 @@ from app.users.services import AuthenticateUser
 
 from . import exceptions
 from .schemas import CurrencyPair
-from .schemas import FavoritePairList
-from .schemas import RateOutput
+from .schemas import FavoritePairListCreate
+from .schemas import RateOutput, FavoritePairOutput
 from .services import CurrencyService
 
-converter_router = APIRouter(tags=['Rates'])
+converter_router = APIRouter(prefix='/currencies', tags=['Rates'])
 
 
 @converter_router.get('/rate', response_model=RateOutput)
@@ -32,11 +32,11 @@ async def get_rate(
     return rate
 
 
-@converter_router.post('/favorite_rates')
+@converter_router.post('/favorite_rates/create')
 async def add_favorite_pairs(
     user: AuthenticateUser,
     db_session: DataBaseSession,
-    favorite_list: FavoritePairList,
+    favorite_list: FavoritePairListCreate,
     service: CurrencyService = Depends(),
 ):
     """Add favorite currency pairs."""
@@ -52,7 +52,7 @@ async def add_favorite_pairs(
     return {'detail': 'Favorite currencies were saved.'}
 
 
-@converter_router.get('/favorite_rates', response_model=list[RateOutput])
+@converter_router.get('/favorite_rates', response_model=list[FavoritePairOutput])
 async def get_favorite_pairs(
     user: AuthenticateUser,
     db_session: DataBaseSession,
@@ -67,11 +67,11 @@ async def get_favorite_pairs(
     return result
 
 
-@converter_router.delete('/favorite_rates')
+@converter_router.delete('/favorite_rates/remove')
 async def delete_favorite_pairs(
     user: AuthenticateUser,
     db_session: DataBaseSession,
-    favorite_list: FavoritePairList,
+    favorite_list: FavoritePairListCreate,
     service: CurrencyService = Depends(),
 ):
     """Delete favorite currency pair."""

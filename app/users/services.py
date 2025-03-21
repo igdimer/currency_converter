@@ -32,8 +32,7 @@ class AuthService:
     class UserNotFoundError(BaseServiceError):
         """No user with provided username."""
 
-    @classmethod
-    async def _hash_password(cls, password: str) -> str:
+    async def _hash_password(self, password: str) -> str:
         """Hash user password to save into database."""
         secret = settings.AUTH_SECRET
         string = secret + password
@@ -41,8 +40,7 @@ class AuthService:
 
         return hashed_password.hexdigest()
 
-    @classmethod
-    async def _generate_jwt_tokens(cls, username: str) -> dict[str, str]:
+    async def _generate_jwt_tokens(self, username: str) -> dict[str, str]:
         """Generate access and refresh tokens."""
         access_exp_time = (dt.datetime.now(tz=dt.timezone.utc)
                            + dt.timedelta(days=settings.ACCESS_TOKEN_LIFETIME_DAYS))
@@ -70,53 +68,49 @@ class AuthService:
 
         return {'access_token': access_token, 'refresh_token': refresh_token}
 
-    @classmethod
-    async def get_user(cls, *, username: str, db_session: AsyncSession) -> User:
+    async def get_user(self, *, username: str, db_session: AsyncSession) -> User:
         """Get user from database."""
         user = await db_session.scalar(select(User).where(User.username == username))
         if not user:
-            raise cls.UserNotFoundError()
+            raise self.UserNotFoundError()
 
         return user
 
-    @classmethod
     async def signup(
-        cls,
+        self,
         *,
         username: str,
         password: str,
         db_session: AsyncSession,
     ) -> dict[str, str]:
         """Signup with provided username and password and get tokens."""
-        hashed_password = await cls._hash_password(password)
+        hashed_password = await self._hash_password(password)
         try:
             user = User(username=username, password=hashed_password)
             db_session.add(user)
             await db_session.commit()
         except IntegrityError as exc:
-            raise cls.UserAlreadyExists() from exc
+            raise self.UserAlreadyExists() from exc
 
-        return await cls._generate_jwt_tokens(username)
+        return await self._generate_jwt_tokens(username)
 
-    @classmethod
     async def login(
-        cls,
+        self,
         *,
         username: str,
         password: str,
         db_session: AsyncSession,
     ) -> dict[str, str]:
         """Log in and get tokens."""
-        user = await cls.get_user(username=username, db_session=db_session)
-        hashed_password = await cls._hash_password(password=password)
+        user = await self.get_user(username=username, db_session=db_session)
+        hashed_password = await self._hash_password(password=password)
         if user.password != hashed_password:
-            raise cls.Unauthorized()
+            raise self.Unauthorized()
 
-        return await cls._generate_jwt_tokens(username)
+        return await self._generate_jwt_tokens(username)
 
-    @classmethod
     async def refresh_token(
-        cls,
+        self,
         *,
         refresh_token: str,
         db_session: AsyncSession,
@@ -125,23 +119,22 @@ class AuthService:
         try:
             decoded = jwt.decode(refresh_token, settings.JWT_TOKEN_SECRET, algorithms=['HS256'])
         except jwt.InvalidTokenError as exc:
-            raise cls.InvalidTokenError() from exc
+            raise self.InvalidTokenError() from exc
 
         try:
             username: str = decoded['username']
             token_type: str = decoded['type']
         except KeyError as exc:
-            raise cls.InvalidTokenError() from exc
+            raise self.InvalidTokenError() from exc
 
-        await cls.get_user(username=username, db_session=db_session)
+        await self.get_user(username=username, db_session=db_session)
         if token_type != 'refresh':  # noqa: S105
-            raise cls.InvalidTokenError()
+            raise self.InvalidTokenError()
 
-        return await cls._generate_jwt_tokens(username)
+        return await self._generate_jwt_tokens(username)
 
-    @classmethod
     async def authenticate(
-        cls,
+        self,
         authorization: Annotated[str, Header()],
         db_session: DataBaseSession,
     ) -> User:
@@ -150,11 +143,11 @@ class AuthService:
         try:
             decoded = jwt.decode(access_token, settings.JWT_TOKEN_SECRET, algorithms=['HS256'])
             username: str = decoded['username']
-            user = await cls.get_user(username=username, db_session=db_session)
-        except (jwt.InvalidTokenError, KeyError, cls.UserNotFoundError) as exc:
+            user = await self.get_user(username=username, db_session=db_session)
+        except (jwt.InvalidTokenError, KeyError, self.UserNotFoundError) as exc:
             raise UnauthorizedError from exc
 
         return user
 
 
-AuthenticateUser = Annotated[User, Depends(AuthService.authenticate)]
+AuthenticateUser = Annotated[User, Depends(AuthService().authenticate)]
