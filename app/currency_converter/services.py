@@ -45,7 +45,6 @@ class CurrencyService:
             'available_currencies',
             mapping=currencies,
         )
-        await self._redis_client.aclose()  # type: ignore[attr-defined]
 
         self._available_currencies = currencies
 
@@ -58,7 +57,6 @@ class CurrencyService:
             currencies = await self._redis_client.hgetall('available_currencies')  # type: ignore
             if not currencies:
                 currencies = await self._get_available_currencies_from_external_api()
-            await self._redis_client.aclose()  # type: ignore[attr-defined]
 
         if code not in currencies:
             raise self.CurrencyNotAvailableError()
@@ -76,11 +74,11 @@ class CurrencyService:
 
         rate = result['rate']
 
-        return RateOutput(
-            pair=result['pair'],
-            rate=rate,
-            description=f'1 {base} = {rate} {target}',
-        )
+        return {
+            'pair': result['pair'],
+            'rate': rate,
+            'description': f'1 {base} = {rate} {target}',
+        }
 
     async def add_favorite_list(
         self,
@@ -110,10 +108,11 @@ class CurrencyService:
         favorite_pairs = await db_session.scalars(
             select(FavoritePair).where(FavoritePair.user_id == user.id),
         )
+        instances = favorite_pairs.all()
 
         tasks = []
         async with ExchangerateClient() as client:
-            for pair in favorite_pairs:
+            for pair in instances:
                 tasks.append(client.get_rate(base=pair.base, target=pair.target))
 
             try:
@@ -122,16 +121,17 @@ class CurrencyService:
                 raise self.ExchangerateClientError(message=exc.message) from exc
 
         result = []
-        for item in result_rates:
+        for item, pair in zip(result_rates, instances):
             rate = item['rate']
             base = item['base']
             target = item['target']
 
-            result.append(RateOutput(
-                pair=item['pair'],
-                rate=rate,
-                description=f'1 {base} = {rate} {target}',
-            ))
+            result.append({
+                'id': pair.id,
+                'pair': item['pair'],
+                'rate': rate,
+                'description': f'1 {base} = {rate} {target}',
+            })
 
         return result
 

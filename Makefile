@@ -5,6 +5,8 @@ run_app:
 stop:
 	docker compose -f docker-compose.dev.yml stop
 
+enter_db:
+	docker compose exec db bash
 update_requirements:
 	pip-compile && pip-compile requirements.dev.in
 
