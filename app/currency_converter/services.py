@@ -140,16 +140,11 @@ class CurrencyService:
         *,
         user: User,
         db_session: AsyncSession,
-        pairs: list[CurrencyPair],
+        pairs: list[int],
     ):
         """Remove currency rates from favorite list."""
-        conditions = []
-        for pair in pairs:
-            condition = and_(FavoritePair.base == pair.base, FavoritePair.target == pair.target)
-            conditions.append(condition)
-
         result = await db_session.execute(
-            delete(FavoritePair).where(FavoritePair.user_id == user.id).where(or_(*conditions)),
+            delete(FavoritePair).where(FavoritePair.id.in_(pairs), FavoritePair.user_id == user.id),
         )
         await db_session.commit()
         message = ('Provided pairs were not found.'
