@@ -5,7 +5,6 @@ from sqlalchemy import select
 
 from app.currency_converter.clients import ExchangerateClient
 from app.currency_converter.schemas import CurrencyPair
-from app.currency_converter.schemas import RateOutput
 from app.currency_converter.services import CurrencyService
 from app.redis import redis_client
 from app.users.models import FavoritePair
@@ -107,11 +106,11 @@ class TestCurrencyServiceGetRate:
     ):
         """Successful execution."""
         service = CurrencyService()
-        expected_result = RateOutput(
-            pair=self.base + self.target,
-            rate=0.55,
-            description=f'1 {self.base} = 0.55 {self.target}',
-        )
+        expected_result = {
+            'pair': self.base + self.target,
+            'rate': 0.55,
+            'description': f'1 {self.base} = 0.55 {self.target}',
+        }
 
         assert await service.get_rate(base=self.base, target=self.target) == expected_result
         mock_is_currency_available.assert_any_await(code=self.base)
@@ -252,9 +251,9 @@ class TestCurrencyServiceGetFavoritePairs:
         assert mock_client_get_rate.call_count == 1
         mock_client_get_rate.assert_awaited_with(base='BTC', target='USD')
 
-        assert pair.pair == 'BTCUSD'
-        assert pair.rate == 40000
-        assert pair.description == '1 BTC = 40000 USD'
+        assert pair['pair'] == 'BTCUSD'
+        assert pair['rate'] == 40000
+        assert pair['description'] == '1 BTC = 40000 USD'
 
     async def test_another_user_has_pairs(
         self,
@@ -283,13 +282,13 @@ class TestCurrencyServiceGetFavoritePairs:
             mock.call(base='GEL', target='USD'),
         ])
 
-        assert pair1.pair == 'USDAMD'
-        assert pair1.rate == 400.0
-        assert pair1.description == '1 USD = 400.0 AMD'
+        assert pair1['pair'] == 'USDAMD'
+        assert pair1['rate'] == 400.0
+        assert pair1['description'] == '1 USD = 400.0 AMD'
 
-        assert pair2.pair == 'GELUSD'
-        assert pair2.rate == 0.38
-        assert pair2.description == '1 GEL = 0.38 USD'
+        assert pair2['pair'] == 'GELUSD'
+        assert pair2['rate'] == 0.38
+        assert pair2['description'] == '1 GEL = 0.38 USD'
 
     async def test_no_favorite_list(self, db_session, user_factory, mock_client_get_rate):
         """User has no favorite rates list."""

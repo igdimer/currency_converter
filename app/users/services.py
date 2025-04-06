@@ -4,7 +4,8 @@ from typing import Annotated
 
 import jwt
 from fastapi import Depends
-from fastapi import Header
+from fastapi.security import HTTPAuthorizationCredentials
+from fastapi.security import HTTPBearer
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -15,6 +16,8 @@ from app.database import DataBaseSession
 
 from .exceptions import UnauthorizedError
 from .models import User
+
+oauth2_scheme = HTTPBearer(auto_error=False)
 
 
 class AuthService:
@@ -135,11 +138,13 @@ class AuthService:
 
     async def authenticate(
         self,
-        authorization: Annotated[str, Header()],
+        authorization: Annotated[HTTPAuthorizationCredentials, Depends(oauth2_scheme)],
         db_session: DataBaseSession,
     ) -> User:
         """Authenticate user by access token."""
-        access_token = authorization.split()[-1]
+        if not authorization:
+            raise UnauthorizedError
+        access_token = authorization.credentials
         try:
             decoded = jwt.decode(access_token, settings.JWT_TOKEN_SECRET, algorithms=['HS256'])
             username: str = decoded['username']
