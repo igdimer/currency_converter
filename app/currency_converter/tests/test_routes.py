@@ -7,9 +7,9 @@ client = TestClient(app)
 
 
 class TestGetRate:
-    """Test route /rate."""
+    """Test route /currencies/rate."""
 
-    url = 'api/rate'
+    url = 'api/currencies/rate'
     params = {'base': 'BTC', 'target': 'USD'}
 
     def test_success(self, mock_currency_service_get_rate):

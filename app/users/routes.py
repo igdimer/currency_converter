@@ -7,9 +7,12 @@ from fastapi import Depends
 from app.database import DataBaseSession
 
 from . import exceptions
+from .responses import InvalidToken
+from .responses import Unauthorized
+from .responses import UserAlreadyExists
+from .responses import UserNotFound
 from .schemas import TokensOutput
 from .services import AuthService
-from .responses import UserAlreadyExists, UserNotFound, Unauthorized, InvalidToken
 
 users_router = APIRouter(prefix='/users', tags=['Users'])
 

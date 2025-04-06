@@ -1,8 +1,6 @@
 import asyncio
 
-from sqlalchemy import and_
 from sqlalchemy import delete
-from sqlalchemy import or_
 from sqlalchemy import select
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -14,7 +12,6 @@ from app.users.models import User
 
 from .clients import ExchangerateClient
 from .schemas import CurrencyPair
-from .schemas import RateOutput
 
 
 class CurrencyService:
@@ -144,7 +141,8 @@ class CurrencyService:
     ):
         """Remove currency rates from favorite list."""
         result = await db_session.execute(
-            delete(FavoritePair).where(FavoritePair.id.in_(pairs), FavoritePair.user_id == user.id),
+            delete(FavoritePair)
+            .where(FavoritePair.id.in_(pairs), FavoritePair.user_id == user.id),
         )
         await db_session.commit()
         message = ('Provided pairs were not found.'

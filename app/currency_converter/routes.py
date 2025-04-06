@@ -1,17 +1,21 @@
 from fastapi import APIRouter
 from fastapi import Depends
 
-from app.database import DataBaseSession
-from app.users.services import AuthenticateUser
-from app.users.responses import Unauthorized
-
 from app.core.utils import parse_query_parameters_as_list_int
+from app.database import DataBaseSession
+from app.users.responses import Unauthorized
+from app.users.services import AuthenticateUser
+
 from . import exceptions
+from .responses import BadRequest
+from .responses import CurrencyNotAvailable
+from .responses import FavoritePairsCreated
+from .responses import FavoritePairsDeleted
 from .schemas import CurrencyPair
 from .schemas import FavoritePairListCreate
-from .schemas import RateOutput, FavoritePairOutput
+from .schemas import FavoritePairOutput
+from .schemas import RateOutput
 from .services import CurrencyService
-from .responses import CurrencyNotAvailable, FavoritePairsCreated, BadRequest, FavoritePairsDeleted
 
 converter_router = APIRouter(prefix='/currencies', tags=['Currencies'])
 

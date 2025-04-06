@@ -7,6 +7,7 @@ stop:
 
 enter_db:
 	docker compose exec db bash
+
 update_requirements:
 	pip-compile && pip-compile requirements.dev.in
 
