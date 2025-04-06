@@ -6,6 +6,7 @@ from app.database import DataBaseSession
 from app.users.responses import Unauthorized
 from app.users.services import AuthenticateUser
 
+from app.core.utils import parse_query_parameters_as_list_int
 from . import exceptions
 from .responses import BadRequest
 from .responses import CurrencyNotAvailable
