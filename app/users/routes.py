@@ -9,11 +9,18 @@ from app.database import DataBaseSession
 from . import exceptions
 from .schemas import TokensOutput
 from .services import AuthService
+from .responses import UserAlreadyExists, UserNotFound, Unauthorized, InvalidToken
 
 users_router = APIRouter(prefix='/users', tags=['Users'])
 
 
-@users_router.post('/signup', response_model=TokensOutput)
+@users_router.post(
+    '/signup',
+    response_model=TokensOutput,
+    responses={
+        409: {'model': UserAlreadyExists, 'description': 'User already exists'},
+    },
+)
 async def signup(
     db_session: DataBaseSession,
     username: Annotated[str, Body()],
@@ -33,7 +40,14 @@ async def signup(
     return tokens
 
 
-@users_router.post('/login', response_model=TokensOutput)
+@users_router.post(
+    '/login',
+    response_model=TokensOutput,
+    responses={
+        401: {'model': Unauthorized, 'description': 'Authentication failed'},
+        404: {'model': UserNotFound, 'description': 'User was not found'},
+    },
+)
 async def login(
     db_session: DataBaseSession,
     username: Annotated[str, Body()],
@@ -55,7 +69,14 @@ async def login(
     return tokens
 
 
-@users_router.post('/refresh_token', response_model=TokensOutput)
+@users_router.post(
+    '/refresh_token',
+    response_model=TokensOutput,
+    responses={
+        401: {'model': InvalidToken, 'description': 'Invalid refresh token'},
+        404: {'model': UserNotFound, 'description': 'User was not found'},
+    },
+)
 async def refresh_tokens(
     db_session: DataBaseSession,
     refresh_token: Annotated[str, Body(embed=True)],

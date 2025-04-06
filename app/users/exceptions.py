@@ -13,7 +13,7 @@ class UserAlreadyExistsError(CustomApiError):
 class UserNotFoundError(CustomApiError):
     """No user with provided username."""
 
-    detail = 'No user with provided username.'
+    detail = 'User was not found.'
     status_code = status.HTTP_404_NOT_FOUND
 
 
